@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { useNavigate } from 'react-router-dom'
 
-const Register= ({setIsLoggedIn}) =>{
+const Register= ({isLoggedIn,setIsLoggedIn}) =>{
     const [firstName, setFirstName]= useState('');
     // const [user, setUser] = useState({
     //     firstName: "",
@@ -17,12 +17,14 @@ const Register= ({setIsLoggedIn}) =>{
     const [password, setPassword]= useState('');
     const [confirmPassword, setConfirmPassword]= useState('');
     const [errors,setErrors] = useState({})
+    const [key, setKey] = useState()
+    const [whoAreYou, setWhoAreYou] = useState("")
     // const [age, setAge]= useState('');
     const navigate = useNavigate();
-
+ 
     const submitForm = (e)=>{
         e.preventDefault();
-        axios.post(`http://localhost:8000/api/user/register`,{firstName,lastName,email,password,confirmPassword})
+        axios.post(`http://localhost:8000/api/user/register`,{firstName,lastName,email,password,confirmPassword,whoAreYou,})
         .then((res)=>{
             console.log(res);
             console.log(res.data);
@@ -33,9 +35,12 @@ const Register= ({setIsLoggedIn}) =>{
             setLastName('');
             setEmail('');
             setPassword('');
+            setWhoAreYou("")
             setConfirmPassword('');
             // setAge('');
             setErrors({})
+            navigate('/viewingPictures')
+
         })
         .catch(err=>{
             console.log(err)
@@ -78,6 +83,36 @@ const Register= ({setIsLoggedIn}) =>{
                         name='lastName'
                         type='text'
                         />
+                    </div>
+                    <div className="input">
+                        <label>Ask Dad for key:</label>
+                        <input onChange={(e)=>setWhoAreYou(e.target.value)}
+                        value={whoAreYou}
+                        name='whoAreYou'
+                        type='text'
+                        />
+                        {/* <input onChange={(e)=>setAllInfo(e.target.value)} value={mom} name='mom' type='text'
+                        />
+                        <input onChange={(e)=>setGrandparent(e.target.value)}
+                        value={grandparent}
+                        name='grandparent'
+                        type='text'
+                        />
+                        <input onChange={(e)=>setUncle(e.target.value)}
+                        value={uncle}
+                        name='uncle'
+                        type='text'
+                        />
+                        <input onChange={(e)=>setAunt(e.target.value)}
+                        value={aunt}
+                        name='aunt'
+                        type='text'
+                        />
+                        <input onChange={(e)=>setCousin(e.target.value)}
+                        value={cousin}
+                        name='cousin'
+                        type='text'
+                        /> */}
                     </div>
                     <div className="input">
                         <label>Email: </label>

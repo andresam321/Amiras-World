@@ -9,10 +9,10 @@ const FileUpload = new mongoose.Schema(
         },
        description: String,
        date: Date,
-        // description:{
-        //   type:String,
-        //   required:[true,"A title is required"]
-        // }
+        user_id:{
+          type:mongoose.Schema.Types.ObjectId,
+          ref:"UserSchema"
+        }
         
 
 

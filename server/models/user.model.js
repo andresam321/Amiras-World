@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+require('dotenv').config();
 
 
 
@@ -18,7 +19,7 @@ const UserSchema = new mongoose.Schema({
       validate: {
         validator: val => /^([\w-\.]+@([\w-]+\.)+[\w-]+)?$/.test(val),
         message: "Please enter a valid email"
-      }
+      }  
       
       
     },
@@ -27,6 +28,37 @@ const UserSchema = new mongoose.Schema({
       required: [true, "Password is required"],
       minlength: [4, "Password must be 8 characters or longer"]
     },
+    // family:{
+    //   type: String,
+    //   enum:["Mom".MOMS_KEY,],
+    //   required:[true, "key required"],
+    // },
+    whoAreYou:{
+      type:String,
+      enum:[process.env.PLEASEKEYME_KEY],
+      required:[true,"OOPS YOU GOT THE WRONG KEY"]
+    },
+    // Grandparents:{
+    //   type:String,
+    //   enum:[process.env.GRANDPARENT_KEY],
+    // },
+    // Uncle:{
+    //   type:String,
+    //   enum:[process.env.UNCLE_KEY],
+    // },
+    // Aunt:{
+    //   type:String,
+    //   enum:[process.env.AUNT_KEY],
+    // },
+    // Cousin:{
+    //   type:String,
+    //   enum:[process.env.COUSINS_KEY],
+    // },
+    
+    uploads_id:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:"FileUpload"
+    }
     
   
   },{timestamps: true});

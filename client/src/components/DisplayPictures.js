@@ -2,21 +2,24 @@ import React, {useState, useEffect} from 'react'
 import axios from "axios"
 import './picture.css'
 import {NavLink} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 // import './picture.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 
 
-const DisplayPictures = () => {
+const DisplayPictures = ({isLoggedIn, setIsLoggedIn}) => {
 
 const [pictures, setPictures] = useState([])
 const [data, setData] = useState([])
+const navigate = useNavigate();
 const [name, setName] = useState()
+const [user, setUser] = useState()
 
 
 useEffect(()=>{
-  axios.get("http://localhost:8000/uploaded/images")
+  axios.get("http://localhost:8000/uploaded/images", {withCredentials:true})
   .then((res)=>{
     // console.log(res.data)
     // setPictures(res.data)
@@ -25,17 +28,47 @@ useEffect(()=>{
   .catch((err)=>{console.log(err)
   
   })
-}, [])
+}, [isLoggedIn])
+
+const handleLogout = () =>{
+  axios.post("http://localhost:8000/api/user/logout", {withCredentials:true})
+  .then((res)=>{
+    setUser(null)
+    
+    navigate('/');
+
+  })
+  .catch((err)=> console.log(err))
+}
+useEffect(()=>{axios.get("http://localhost:8000/api/currentUser", {withCredentials:true})
+    .then((res)=>{
+      console.log(res)
+      console.log(res.data)
+      setUser(res.data)
+    })
+      .catch((err)=>console.log(err))
+    
+  
+  }, [isLoggedIn])
+// make a function that will change state depending on what element is chosen
 
 
   return (
   
   <div className=''>
+  {user ? (
     <div className=''>
       <h1>Amira's World</h1>
+      WELCOME {user.firstName}
       <NavLink to="/addPicture">Add Picture</NavLink>
+      <button onClick={handleLogout}>Logout</button>
       </div>
-
+      ):(
+        <div>
+        <NavLink to="/">Login</NavLink>
+        </div>
+      )}
+      
       {data?.map((obj) => {
           const base64String = btoa(
             new Uint8Array(obj.img.data.data).reduce(function (data, byte) {

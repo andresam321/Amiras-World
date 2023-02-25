@@ -19,25 +19,32 @@ User.find({})
 
 
 
-register: (req, res) => {
-    User.create(req.body)
-    .then(user => {
-    const userToken = jwt.sign({
-        id: user._id
-        }, process.env.SECRET_KEY);
-        console.log("success")
-        res.cookie("usertoken", userToken, process.env.SECRET_KEY, {
-                      httpOnly: true
-        })
-        console.log("success")
-        console.log(user)
-        .json({ msg: "success!", user: user });
-        console.log(user)
-        })
-        .catch(err =>res.json(err));
-          
-      },
-
+registerUser: async (req,res)=>{
+    const {body} = req
+    try{
+        const queriedUser= await User.findOne({email: body.email})
+            if (queriedUser){
+                res.status(400).json({error:"Email aready in use"})
+                return;
+            }
+        
+    } catch(error){
+        res.status(400).json(err);
+    }
+    const newUser = new User(body)
+    try {
+        const newUserObj = await newUser.save()
+        res.json(newUserObj);
+    } catch (error) {
+        console.log("error in save")
+        res.status(400).json(error)
+        return;
+    }
+    const result = await User.create(body)
+    console.log("result", result);
+    // res.json({msg:"here"})
+    return;
+},
 
 
 // register: (req, res)=>{
@@ -101,7 +108,7 @@ logout: (req, res) => {
 
 
 getLoggedInUser:(req,res) =>{
-    const decodedJWT = jwt.decode(req.cookies.usertoken, {complete:true});
+    const decodedJWT = jwt.decode(req.cookies.usertoken,{complete:true});
     User.findById(decodedJWT.payload._id)
     .then(user =>res.json(user))
     // console.log("user in session")
@@ -122,18 +129,21 @@ logIn: (req, res)=> {
                         res.cookie('usertoken', 
                         jwt.sign({
                             _id: user._id,
-                            // username: user.username,
+                            // firstName: user.firstName,
+                            // lastName: user.lastName,
                             // email: user.email,
+                            // whoAreYou: user.whoAreYou
                         },
-                        process.env.SECRET_KEY),
+                        process.env.JWT_SECRET),
                         {
                             httpOnly: true,
-                            expires: new Date(Date.now() + 90000000000)
+                            expires: new Date(Date.now() + 90)
+                            // expiresIn: '15m'
                         })
                         .json({
                             message: 'Successful Log in',
                             userLoggedIn: {
-                                firstName: `${user.firstName}${user.lastName}`
+                                firstName: `${user.firstName} ${user.lastName}`
                             }
                         })
 

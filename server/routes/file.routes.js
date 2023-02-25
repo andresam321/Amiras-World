@@ -7,6 +7,7 @@ let uuidv4 = require("uuid")
 const { default: mongoose } = require('mongoose')
 const path = require('path')
 const fileInfo = require("../controllers/file.controller")
+const { authenticate } = require('../config/jwt.config');
 
 // const app = express()
 
@@ -50,11 +51,13 @@ module.exports = (app) =>{
       
     
   // })
-  app.post("/api/upload", upload.single("image"), (req, res) => {
+  app.post("/api/upload",authenticate, upload.single("image"), (req, res) => {
     const saveImage =  fileUploader({
       name: req.body.name,
       description: req.body.description,
       date: req.body.date,
+      // uploads_id: uploads_id,
+      
       // title: req.body,
       // description: req.body,
       img: {
@@ -62,7 +65,7 @@ module.exports = (app) =>{
         contentType: "image/png",
       },
     });
-    console.log(saveImage)
+    // console.log(saveImage)
     saveImage
       .save()
       .then((res) => {
@@ -75,7 +78,7 @@ module.exports = (app) =>{
   });
 
 
-  app.get('/uploaded/images',async (req,res)=>{
+  app.get('/uploaded/images',authenticate, async (req,res)=>{
     const allData = await fileUploader.find()
     res.json(allData)
   })
