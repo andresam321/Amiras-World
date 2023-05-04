@@ -19,7 +19,7 @@ const [user, setUser] = useState()
 
 
 useEffect(()=>{
-  axios.get("http://localhost:8000/uploaded/images", {withCredentials:true})
+  axios.get("http://localhost:8000/api/uploadedImages", )
   .then((res)=>{
     // console.log(res.data)
     // setPictures(res.data)
@@ -55,47 +55,63 @@ useEffect(()=>{axios.get("http://localhost:8000/api/currentUser", {withCredentia
 
   return (
   
+//   <div className=''>
+//   {/* {user ? ( */}
+//     <div className=''>
+//       <h1>Amira's World</h1>
+//       {/* WELCOME {user.firstName} */}
+//       <NavLink to="/addPicture">Add Picture</NavLink>
+//       <button onClick={handleLogout}>Logout</button>
+//       </div>
+//       {/* ):(
+//         <div>
+//         <NavLink to="/">Login</NavLink>
+//         </div>
+//       )}
+//        */}
+//       {data?.map((obj) => {
+//           const base64String = btoa(
+//             new Uint8Array(obj.im).reduce(function (data, byte) {
+//               return data + String.fromCharCode(byte);
+//             }, "")
+//           );
+//           return (
+//         <div className='display'>
+//           <div className=''>
+//           <p>Title: {obj.name}</p>
+//             <img
+//               src={`data:image/png;base64,${base64String}`}
+//               alt="error"
+//               width="500"
+//               height="500"
+//             />
+//             <div className=''>
+//             {/* <p>{obj.name}</p> */}
+//             <textarea  id="htmlinput">{obj.description}</textarea>
+//             <p>Date: {obj.date}</p>
+//             </div>
+//           </div>
+//         </div>
+//           );
+//         })}
+//     </div>
+//   )
+// }
+<div className=''>
+{ [data].map((image,index)=> {
+  return (
   <div className=''>
-  {user ? (
-    <div className=''>
-      <h1>Amira's World</h1>
-      WELCOME {user.firstName}
-      <NavLink to="/addPicture">Add Picture</NavLink>
-      <button onClick={handleLogout}>Logout</button>
-      </div>
-      ):(
-        <div>
-        <NavLink to="/">Login</NavLink>
+     <div key={image._id}>
+      <h1>{image.description}</h1>
+      <div className= {index === 0 ? "carousel-item active" : "carousel-item"}>
+          <img src={image.url} className="d-block w-100" alt="Sunset Over the City"/>
         </div>
-      )}
-      
-      {data?.map((obj) => {
-          const base64String = btoa(
-            new Uint8Array(obj.img.data.data).reduce(function (data, byte) {
-              return data + String.fromCharCode(byte);
-            }, "")
-          );
-          return (
-        <div className='display'>
-          <div className=''>
-          <p>Title: {obj.name}</p>
-            <img
-              src={`data:image/png;base64,${base64String}`}
-              alt="error"
-              width="500"
-              height="500"
-            />
-            <div className=''>
-            {/* <p>{obj.name}</p> */}
-            <textarea  id="htmlinput">{obj.description}</textarea>
-            <p>Date: {obj.date}</p>
-            </div>
-          </div>
-        </div>
-          );
-        })}
-    </div>
+     </div>
+  </div>
+  )
+})}
+
+</div>
   )
 }
-
 export default DisplayPictures

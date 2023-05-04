@@ -2,111 +2,78 @@ const uploadFile = require("../middleware/upload.middleware");
 const fs = require("fs");
 const baseUrl = "http://localhost:8080/files/";
 const multer = require("multer")
+const FileUpload = require("../models/file.model")
 const upload = multer({dest: "images/"})
+const cloudinary = require('cloudinary').v2
+
+cloudinary.config({
+  cloud_name:process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env. CLOUD_API_SECRET
+})
 
 
+const uploadImage = async (req,res) =>{
+  const image =req.files.image
+const {nameOfImage ,description} = req.body
+ try {
+  const result = await cloudinary.uploader.upload(image.tempFilePath,{
+    folder:"amirasImages"
+  })
+  const product = await FileUpload.create({
+    nameOfImage,
+    description,
+    image:{
+      public_id:result.public_id,
+      url:result.secure_url
+    }
+  })
+  console.log(product)
+  res.status(201).json({
+    success: true,
+    product
+  })
+  
+ } catch (error) {
+  console.log(error)
+ }
+}
 
-const load = async (req, res) => {
+const displayImages = async (req, res, next) => {
+
+  //enable pagination
+  const pageSize = 3;
+  const page = Number(req.query.pageNumber) || 1;
+  const count = await FileUpload.find({}).estimatedDocumentCount();
+
+  //filter
+  let category = req.query.category;
+  let query = category !== '' ? category : ids;
   try {
-    await uploadFile(req, res);
 
-    if (req.file == undefined) {
-      return res.status(400).send({ message: "Please upload a file!" });
-    }
+      const products = await FileUpload.find({ category: query }).populate('nameOfImage', 'description',"image")
+          .skip(pageSize * (page - 1))
+          .limit(pageSize)
 
-    res.status(200).send({
-      message: "Uploaded the file successfully: " + req.file.originalname,
-    });
-  } catch (err) {
-    console.log(err);
+      res.status(201).json({
+          success: true,
+          products,
+          page,
+          pages: Math.ceil(count / pageSize),
+          count
+      })
 
-    if (err.code == "LIMIT_FILE_SIZE") {
-      return res.status(500).send({
-        message: "File size cannot be larger than 2MB!",
-      });
-    }
+  } catch (error) {
+      console.log(error);
+      next(error);
 
-    res.status(400).send({
-      message: `Could not upload the file: ${req.file.originalname}. ${err}`,
-    });
   }
-};
 
-const getListFiles = (req, res) => {
-  const directoryPath = __basedir + './images/';
+}
 
-  fs.readdir(directoryPath, function (err, files) {
-    if (err) {
-      res.status(500).send({
-        message: "Unable to scan files!",
-      });
-    }
-
-    let fileInfos = [];
-
-    files.forEach((file) => {
-      fileInfos.push({
-        name: file,
-        url: baseUrl + file,
-      });
-    });
-
-    res.status(200).send(fileInfos);
-  });
-};
-
-const download = (req, res) => {
-  const fileName = req.params.name;
-  const directoryPath = __basedir + "/resources/static/assets/uploads/";
-
-  res.download(directoryPath + fileName, fileName, (err) => {
-    if (err) {
-      res.status(500).send({
-        message: "Could not download the file. " + err,
-      });
-    }
-  });
-};
-
-const remove = (req, res) => {
-  const fileName = req.params.name;
-  const directoryPath = __basedir + "/resources/static/assets/uploads/";
-
-  fs.unlink(directoryPath + fileName, (err) => {
-    if (err) {
-      res.status(500).send({
-        message: "Could not delete the file. " + err,
-      });
-    }
-
-    res.status(200).send({
-      message: "File is deleted.",
-    });
-  });
-};
-
-const removeSync = (req, res) => {
-  const fileName = req.params.name;
-  const directoryPath = __basedir + "/resources/static/assets/uploads/";
-
-  try {
-    fs.unlinkSync(directoryPath + fileName);
-
-    res.status(200).send({
-      message: "File is deleted.",
-    });
-  } catch (err) {
-    res.status(500).send({
-      message: "Could not delete the file. " + err,
-    });
-  }
-};
 
 module.exports = {
-  // fileUpload,
-  load,
-  getListFiles,
-  download,
-  remove,
-  removeSync,
+  uploadImage,
+  displayImages
+  
 };
